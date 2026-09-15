@@ -1,39 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import ChatWindow from '../components/ChatWindow';
 import InputBar from '../components/InputBar';
 import { sendMessage, getConversations, getConversation, deleteConversation } from '../utils/api';
 import type { Message, Conversation } from '../types';
 
-export default function ChatPage() {
-  const { user, logout } = useAuth();
+interface ChatPageProps {
+  onLock: () => void;
+}
 
+export default function ChatPage({ onLock }: ChatPageProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Get Firebase ID token (null in demo mode)
-  const getToken = useCallback(async () => {
-    try {
-      return user ? await user.getIdToken() : null;
-    } catch {
-      return null;
-    }
-  }, [user]);
-
-  // Load conversations list
+  // Load conversations list (no auth token needed — backend runs without auth)
   const loadConversations = useCallback(async () => {
     try {
-      const token = await getToken();
-      const { conversations: convs } = await getConversations(token);
+      const { conversations: convs } = await getConversations(null);
       setConversations(convs);
     } catch {
       // Backend might not be running — silently fail
     }
-  }, [getToken]);
+  }, []);
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
@@ -43,14 +34,13 @@ export default function ChatPage() {
 
     (async () => {
       try {
-        const token = await getToken();
-        const { conversation } = await getConversation(activeConvId, token);
+        const { conversation } = await getConversation(activeConvId, null);
         setMessages(conversation.messages || []);
       } catch {
         setMessages([]);
       }
     })();
-  }, [activeConvId, getToken]);
+  }, [activeConvId]);
 
   // Send a message
   const handleSend = useCallback(async (text: string) => {
@@ -66,8 +56,7 @@ export default function ChatPage() {
     setIsTyping(true);
 
     try {
-      const token = await getToken();
-      const { conversationId, message: aiMsg } = await sendMessage(text.trim(), activeConvId, token);
+      const { conversationId, message: aiMsg } = await sendMessage(text.trim(), activeConvId, null);
 
       // If this was a new conversation, select it
       if (!activeConvId) setActiveConvId(conversationId);
@@ -88,7 +77,7 @@ export default function ChatPage() {
     } finally {
       setIsTyping(false);
     }
-  }, [activeConvId, getToken, isTyping, loadConversations]);
+  }, [activeConvId, isTyping, loadConversations]);
 
   // Start a new conversation
   const handleNewChat = () => {
@@ -99,15 +88,14 @@ export default function ChatPage() {
   // Delete a conversation
   const handleDelete = useCallback(async (id: string) => {
     try {
-      const token = await getToken();
-      await deleteConversation(id, token);
+      await deleteConversation(id, null);
       if (activeConvId === id) {
         setActiveConvId(null);
         setMessages([]);
       }
       await loadConversations();
     } catch { /* silent */ }
-  }, [activeConvId, getToken, loadConversations]);
+  }, [activeConvId, loadConversations]);
 
   const activeTitle = conversations.find(c => c.id === activeConvId)?.title || null;
 
@@ -119,8 +107,8 @@ export default function ChatPage() {
         onSelect={id => { setActiveConvId(id); if (window.innerWidth < 768) setSidebarOpen(false); }}
         onNewChat={handleNewChat}
         onDelete={handleDelete}
-        user={user}
-        onLogout={logout}
+        user={null}
+        onLogout={onLock}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(o => !o)}
       />
