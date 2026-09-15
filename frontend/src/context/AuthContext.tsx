@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth, isFirebaseConfigured } from '../firebase';
+import React, { createContext, useContext } from 'react';
+
+// AuthContext is kept as a stub — Firebase auth has been replaced by PinGate.
+// ChatPage no longer uses this, but it's here to prevent import errors in legacy files.
 
 interface AuthContextType {
-  user: User | null;
+  user: null;
   loading: boolean;
   logout: () => Promise<void>;
   isConfigured: boolean;
@@ -23,38 +24,14 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(isFirebaseConfigured);
-  const [isDemo, setIsDemo] = useState(false);
-
-  useEffect(() => {
-    if (!isFirebaseConfigured) return;
-
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      setLoading(false);
-    });
-    return unsubscribe;
-  }, []);
-
-  const logout = async () => {
-    if (isFirebaseConfigured && user) {
-      await signOut(auth);
-    }
-    setIsDemo(false);
-    setUser(null);
-  };
-
-  const enterDemoMode = () => setIsDemo(true);
-
   return (
     <AuthContext.Provider value={{
-      user,
-      loading,
-      logout,
-      isConfigured: isFirebaseConfigured,
-      isDemo,
-      enterDemoMode,
+      user: null,
+      loading: false,
+      logout: async () => {},
+      isConfigured: false,
+      isDemo: false,
+      enterDemoMode: () => {},
     }}>
       {children}
     </AuthContext.Provider>

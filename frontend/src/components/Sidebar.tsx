@@ -1,4 +1,3 @@
-import type { User } from 'firebase/auth';
 import type { Conversation } from '../types';
 
 interface SidebarProps {
@@ -7,7 +6,7 @@ interface SidebarProps {
   onSelect: (id: string) => void;
   onNewChat: () => void;
   onDelete: (id: string) => void;
-  user: User | null;
+  user: null;
   onLogout: () => void;
   isOpen: boolean;
   onToggle: () => void;
@@ -35,11 +34,11 @@ function groupConversations(convs: Conversation[]) {
 }
 
 export default function Sidebar({
-  conversations, activeId, onSelect, onNewChat, onDelete, user, onLogout, isOpen,
+  conversations, activeId, onSelect, onNewChat, onDelete, onLogout, isOpen,
 }: SidebarProps) {
   const groups = groupConversations(conversations);
-  const displayName = user?.displayName || user?.email?.split('@')[0] || 'Demo User';
-  const avatarInitial = displayName[0]?.toUpperCase() || 'D';
+  const displayName = 'Draken User';
+  const avatarInitial = 'D';
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`} aria-label="Conversations sidebar">
@@ -116,7 +115,7 @@ export default function Sidebar({
           <div className="user-avatar">{avatarInitial}</div>
           <div className="user-info">
             <p className="user-name">{displayName}</p>
-            <p className="user-email">{user?.email || 'demo mode'}</p>
+            <p className="user-email">private access</p>
           </div>
           <button
             id="logout-btn"
