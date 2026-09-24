@@ -1,5 +1,5 @@
-// In production, set VITE_API_URL in your Vercel environment variables
-// pointing to your Render.com backend URL (e.g. https://draken-api.onrender.com)
+// In production, VITE_API_URL is set as a GitHub Actions secret
+// pointing to the Render.com backend: https://draken-bauj.onrender.com/api
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3001/api';
 
 /** Build auth headers – works with or without a token (backend allows no-token in dev mode) */
