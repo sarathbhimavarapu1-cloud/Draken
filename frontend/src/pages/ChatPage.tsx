@@ -70,7 +70,9 @@ export default function ChatPage({ onLock }: ChatPageProps) {
         {
           id: `err-${Date.now()}`,
           role: 'assistant',
-          content: '⚠️ Could not reach the backend. Make sure the Draken API server is running on port 3001.\n\n```\ncd backend\nnpm run dev\n```',
+          content: import.meta.env.VITE_API_URL
+            ? '⚠️ Could not reach the backend. The server may be waking up — please try again in 30 seconds.'
+            : '⚠️ Could not reach the backend. Make sure the Draken API server is running on port 3001.\n\n```\ncd backend\nnpm run dev\n```',
           timestamp: new Date().toISOString(),
         },
       ]);
